@@ -4,7 +4,7 @@ publish_to: 'none'
 version: 1.2.0+12
 
 environment:
-  sdk: ^3.12.1
+  sdk: ^3.6.0
 
 dependencies:
   flutter:
@@ -24,26 +24,10 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^6.0.0
+  flutter_lints: ^5.0.0
   freezed: ^2.5.2
   json_serializable: ^6.8.0
   build_runner: ^2.4.11
 
 flutter:
   uses-material-design: true
-  assets:
-    - assets/images/
-    - assets/icons/
-  fonts:
-    - family: Inter
-      fonts:
-        - asset: assets/fonts/Inter-Regular.ttf
-        - asset: assets/fonts/Inter-Medium.ttf
-          weight: 500
-        - asset: assets/fonts/Inter-SemiBold.ttf
-          weight: 600
-    - family: JetBrainsMono
-      fonts:
-        - asset: assets/fonts/JetBrainsMono-Regular.ttf
-        - asset: assets/fonts/JetBrainsMono-Medium.ttf
-          weight: 500
