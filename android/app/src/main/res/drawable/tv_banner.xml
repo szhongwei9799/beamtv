@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- TV Banner 尺寸: 320x180dp (16:9) -->
+    <item android:drawable="@color/beam_bg_marketing" />
+
+    <!-- 左侧 Logo -->
+    <item
+        android:left="24dp"
+        android:top="30dp"
+        android:bottom="30dp"
+        android:width="120dp">
+        <vector
+            android:width="120dp"
+            android:height="120dp"
+            android:viewportWidth="24"
+            android:viewportHeight="24">
+            <path
+                android:fillColor="@color/beam_brand_violet"
+                android:pathData="M12,2L4,22h16L12,2z" />
+            <path
+                android:fillColor="@color/beam_brand_violet_hover"
+                android:pathData="M12,6L8,18h8L12,6z" />
+        </vector>
+    </item>
+
+    <!-- 右侧文字 -->
+    <item
+        android:left="160dp"
+        android:right="24dp"
+        android:top="30dp"
+        android:bottom="30dp"
+        android:gravity="center_vertical">
+        <bitmap android:src="@drawable/tv_banner_text" />
+    </item>
+</layer-list>

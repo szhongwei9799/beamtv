@@ -1,0 +1,79 @@
+# Flutter/Dart/Pub
+.dart_tool/
+.packages
+pubspec.lock
+build/
+*.dart_tool/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Android
+local.properties
+.gradle/
+build/
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+*.keystore
+*.jks
+debug.keystore
+*.log
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/ephemeral/
+*.xcuserstate
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+
+# macOS
+macos/Flutter/Generated.xcconfig
+
+# Linux
+linux/ephemeral/
+
+# Windows
+windows/ephemeral/
+
+# Web
+web/build/
+
+# Coverage
+coverage/
+lcov.info
+
+# Misc
+*.pyc
+__pycache__/
+*.orig
+*.swp
+*.bak
+*.tmp
+*.temp
+
+# Environment
+.env
+.env.local
+*.env
+
+# Generated files
+lib/generated/
+*.g.dart
+*.freezed.dart
+
+# Release keystore (if any)
+android/app/release.keystore
+android/key.properties

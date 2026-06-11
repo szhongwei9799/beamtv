@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 启动主题 - 深色模式优先 -->
+    <style name="LaunchTheme" parent="@android:style/Theme.NoTitleBar">
+        <item name="android:windowBackground">@drawable/launch_background</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+    <!-- 应用主题 - 基于 Theme.Material3.Dark.NoActionBar -->
+    <style name="AppTheme" parent="@style/Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/beam_bg_marketing</item>
+        <item name="android:colorBackground">@color/beam_bg_marketing</item>
+        <item name="android:statusBarColor">@color/beam_bg_panel</item>
+        <item name="android:navigationBarColor">@color/beam_bg_panel</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
+
+    <!-- 设置页面主题 -->
+    <style name="AppTheme.Settings" parent="AppTheme">
+        <item name="android:windowBackground">@color/beam_bg_marketing</item>
+    </style>
+
+    <!-- NormalTheme - Flutter 渲染后使用 -->
+    <style name="NormalTheme" parent="AppTheme">
+        <item name="android:windowBackground">@color/beam_bg_marketing</item>
+    </style>
+
+    <!-- TV Banner 样式 -->
+    <style name="AppTheme.TVBanner" parent="AppTheme">
+        <item name="android:windowBackground">@drawable/tv_banner</item>
+    </style>
+</resources>

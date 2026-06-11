@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BeamTV</string>
+    <string name="app_name_short">BeamTV</string>
+    <string name="app_name_zh">光线传播</string>
+    <string name="settings_title">设置</string>
+    <string name="launch_screen_title">BeamTV</string>
+</resources>

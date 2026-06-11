@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- BeamTV 色彩系统 - 对齐 Linear 设计语言 -->
+    <color name="beam_bg_marketing">#08090A</color>
+    <color name="beam_bg_panel">#0F1011</color>
+    <color name="beam_bg_surface">#191A1B</color>
+    <color name="beam_bg_secondary">#28282C</color>
+
+    <color name="beam_text_primary">#F7F8F8</color>
+    <color name="beam_text_secondary">#D0D6E0</color>
+    <color name="beam_text_tertiary">#8A8F98</color>
+    <color name="beam_text_quaternary">#62666D</color>
+
+    <color name="beam_brand_indigo">#5E6AD2</color>
+    <color name="beam_brand_violet">#7170FF</color>
+    <color name="beam_brand_violet_hover">#828FFF</color>
+    <color name="beam_brand_lavender">#7A7FAD</color>
+
+    <color name="beam_success_green">#27A644</color>
+    <color name="beam_success_emerald">#10B981</color>
+    <color name="beam_warning_amber">#F59E0B</color>
+    <color name="beam_error_red">#EF4444</color>
+
+    <color name="beam_border_subtle">#0DFFFFFF</color>
+    <color name="beam_border_standard">#14FFFFFF</color>
+    <color name="beam_border_solid">#23252A</color>
+    <color name="beam_border_line_tint">#141516</color>
+
+    <color name="beam_overlay_primary">#D9000000</color>
+</resources>
