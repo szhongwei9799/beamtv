@@ -22,14 +22,4 @@
                 android:pathData="M12,6L8,18h8L12,6z" />
         </vector>
     </item>
-
-    <!-- 右侧文字 -->
-    <item
-        android:left="160dp"
-        android:right="24dp"
-        android:top="30dp"
-        android:bottom="30dp"
-        android:gravity="center_vertical">
-        <bitmap android:src="@drawable/tv_banner_text" />
-    </item>
 </layer-list>
