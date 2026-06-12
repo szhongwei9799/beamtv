@@ -44,6 +44,5 @@ jobs:
         with:
           name: beamtv-debug-apk
           path: |
-            build/app/outputs/flutter-apk/app-*-debug.apk
-            build/app/outputs/apk/debug/app-*-debug.apk
+            build/**/*.apk
           retention-days: 30
