@@ -36,7 +36,11 @@ jobs:
 
       - name: Build APK
         run: |
-          flutter build apk --debug --split-per-abi --verbose 2>&1 | tail -200
+          flutter build apk --debug
+          echo "=== APK find ==="
+          find . -name "*.apk" -type f 2>/dev/null
+          echo "=== outputs ==="
+          ls -la build/app/outputs/ 2>/dev/null || echo "no outputs dir"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
@@ -44,5 +48,5 @@ jobs:
         with:
           name: beamtv-debug-apk
           path: |
-            build/**/*.apk
+            **/outputs/**/*.apk
           retention-days: 30
