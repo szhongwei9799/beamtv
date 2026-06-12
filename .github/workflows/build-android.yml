@@ -36,17 +36,22 @@ jobs:
 
       - name: Build APK
         run: |
-          flutter build apk --debug
-          echo "=== APK find ==="
-          find . -name "*.apk" -type f 2>/dev/null
-          echo "=== outputs ==="
-          ls -la build/app/outputs/ 2>/dev/null || echo "no outputs dir"
+          flutter build apk --debug 2>&1 | tee build.log || true
+          echo "=== ERROR SEARCH ==="
+          grep -i "error\|Error\|FAILED\|Exception\|What went wrong\|FAILURE" build.log | head -20 || echo "no errors in log"
+          echo "=== LAST 30 LINES ==="
+          tail -30 build.log
+          echo "=== APK SEARCH ==="
+          find . -name "*.apk" -type f 2>/dev/null || echo "no apks"
+          grep -q "BUILD SUCCESSFUL" build.log && echo "BUILD SUCCESSFUL" || exit 1
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: beamtv-debug-apk
+          name: beamtv-build-output
           path: |
+            build.log
             **/outputs/**/*.apk
-          retention-days: 30
+            build/**/*.apk
+          retention-days: 7
