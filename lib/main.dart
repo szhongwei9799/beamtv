@@ -1,19 +1,18 @@
 // BeamTV 应用入口
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/theme/beam_theme.dart';
 import 'core/routing/app_router.dart';
 import 'core/constants/app_constants.dart';
+import 'core/extensions/context_ext.dart';
+import 'core/models/media_models.dart';
 import 'features/local_media/presentation/providers/local_media_provider.dart';
 import 'features/discover/presentation/providers/discover_provider.dart';
 import 'features/settings/presentation/providers/settings_provider.dart';
 
 void main() {
-  // 确保 Flutter 绑定初始化
   WidgetsFlutterBinding.ensureInitialized();
-
   runApp(const BeamTVApp());
 }
 
@@ -33,7 +32,7 @@ class BeamTVApp extends StatelessWidget {
           return MaterialApp.router(
             title: AppConstants.appName,
             debugShowCheckedModeBanner: false,
-            themeMode: settings.themeMode,
+            themeMode: settings.mode,
             theme: BeamTheme.light,
             darkTheme: BeamTheme.dark,
             routerConfig: AppRouter.router,
@@ -45,7 +44,7 @@ class BeamTVApp extends StatelessWidget {
                 child: child!,
               );
             },
-            localizationsDelegates: const [
+            localizationsDelegates: [
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,

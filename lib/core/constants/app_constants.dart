@@ -46,24 +46,6 @@ class Defaults {
   static const Duration animationDuration = Duration(milliseconds: 200);
 }
 
-/// 支持的媒体源类型
-enum MediaSourceType {
-  smb('SMB/CIFS', 'smb'),
-  webdav('WebDAV', 'webdav'),
-  nfs('NFS', 'nfs'),
-  aliyun('阿里云盘', 'aliyun'),
-  quark('夸克网盘', 'quark'),
-  baidu('百度网盘', 'baidu'),
-  pan115('115网盘', 'pan115'),
-  m3u('M3U 直播源', 'm3u'),
-  iptv('IPTV', 'iptv');
-
-  const MediaSourceType(this.displayName, this.value);
-  final String displayName;
-  final String value;
-}
-
-/// 视频编码格式
 enum VideoCodec {
   av1('AV1'),
   h265('H.265/HEVC'),

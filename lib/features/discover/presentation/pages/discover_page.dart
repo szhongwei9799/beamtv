@@ -1,159 +1,191 @@
-// 发现页面 - "找内容"：多平台聚合搜索、热榜、推荐、直播 EPG、继续观看
-library features.discover.presentation.pages;
-
+/// 发现页面 — 实用密集风
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/beam_theme.dart';
-import '../../../../shared/widgets/main_scaffold.dart';
-import '../widgets/discover_sections.dart'
+import '../../../../core/extensions/context_ext.dart';
+import '../../../../core/models/media_models.dart';
 import '../providers/discover_provider.dart';
+import '../widgets/discover_sections.dart';
 
 class DiscoverPage extends StatelessWidget {
   const DiscoverPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => DiscoverProvider()..initialize(),
-      child: const _DiscoverView(),
+    return Consumer<DiscoverProvider>(
+      builder: (context, provider, _) {
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 搜索栏
+              Container(
+                decoration: BoxDecoration(
+                  color: BeamColors.surface,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: BeamColors.border),
+                ),
+                child: TextField(
+                  style: BeamTextStyles.body,
+                  decoration: InputDecoration(
+                    hintText: '发现精彩内容...',
+                    prefixIcon: const Icon(Icons.search, color: BeamColors.textTertiary, size: 18),
+                    suffixIcon: provider.searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.close, color: BeamColors.textTertiary, size: 16),
+                            onPressed: () => provider.clearSearch(),
+                          )
+                        : null,
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  ),
+                  onChanged: (q) => provider.search(q),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              Expanded(
+                child: provider.searchQuery.isNotEmpty
+                    ? _SearchResultsView(provider: provider)
+                    : ListView(
+                        children: [
+                          if (provider.recentItems.isNotEmpty)
+                            _buildSection('继续观看', provider.recentItems.length, SizedBox(
+                              height: 120,
+                              child: ListView.separated(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: provider.recentItems.length,
+                                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                                itemBuilder: (_, i) => _ContinueWatchingTile(item: provider.recentItems[i]),
+                              ),
+                            )),
+                          const SizedBox(height: 16),
+                          _buildSection('热门推荐', provider.trendingItems.length, DiscoverHorizontalList(items: provider.trendingItems)),
+                          const SizedBox(height: 16),
+                          _buildSection('为你推荐', provider.recommendedItems.length, DiscoverHorizontalList(items: provider.recommendedItems)),
+                          const SizedBox(height: 16),
+                          _buildSection('最新上线', provider.newReleaseItems.length, DiscoverHorizontalList(items: provider.newReleaseItems)),
+                        ],
+                      ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSection(String title, int count, Widget content) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(title, style: BeamTextStyles.h2.copyWith(fontSize: 15)),
+            const SizedBox(width: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+              decoration: BoxDecoration(
+                color: BeamColors.surfaceElevated,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text('$count', style: BeamTextStyles.caption.copyWith(fontSize: 10)),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        content,
+      ],
     );
   }
 }
 
-class _DiscoverView extends StatelessWidget {
-  const _DiscoverView();
+class _ContinueWatchingTile extends StatelessWidget {
+  final ContinueWatchingItem item;
+  const _ContinueWatchingTile({required this.item});
 
   @override
   Widget build(BuildContext context) {
-    return BeamPageScaffold(
-      title: '发现',
-      actions: [
-        IconButton(
-          tooltip: '搜索',
-          icon: const Icon(Icons.search_rounded, size: 24),
-          onPressed: () => context.pushNamed('search'),
-        ),
-        const SizedBox(width: 8),
-      ],
-      body: Consumer<DiscoverProvider>(
-        builder: (context, provider, _) {
-          if (provider.isLoading) {
-            return const LoadingState(message: '加载推荐内容...');
-          }
-
-          if (provider.error != null) {
-            return ErrorState(
-              message: provider.error!,
-              onRetry: provider.initialize,
-            );
-          }
-
-          return RefreshIndicator(
-            onRefresh: provider.refresh,
-            child: CustomScrollView(
-              slivers: [
-                // 搜索栏入口
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                    child: _SearchBarEntry(onTap: () => context.pushNamed('search')),
-                  ),
-                ),
-
-                // 热门推荐轮播
-                if (provider.featured.isNotEmpty)
-                  SliverToBoxAdapter(
-                    child: FeaturedCarousel(items: provider.featured),
-                  ),
-
-                const SliverToBoxAdapter(child: SizedBox(height: 8)),
-
-                // 继续观看 (跨设备同步)
-                if (provider.continueWatching.isNotEmpty)
-                  ContinueWatchingSection(items: provider.continueWatching),
-
-                // 热门榜单
-                if (provider.hotRankings.isNotEmpty)
-                  HotRankingsSection(rankings: provider.hotRankings),
-
-                // 直播频道
-                if (provider.liveChannels.isNotEmpty)
-                  LiveChannelsSection(channels: provider.liveChannels),
-
-                // 分类入口
-                CategoryGridSection(categories: provider.categories),
-
-                // 为你推荐
-                if (provider.recommendations.isNotEmpty)
-                  RecommendationsSection(items: provider.recommendations),
-
-                const SliverToBoxAdapter(child: SizedBox(height: 48)),
+    return Container(
+      width: 200,
+      decoration: BoxDecoration(
+        color: BeamColors.surfaceElevated,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: BeamColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: BeamColors.surfaceDim,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+              ),
+              child: Center(child: Icon(Icons.movie_outlined, color: BeamColors.textTertiary, size: 32)),
+            ),
+          ),
+          ClipRRect(
+            child: LinearProgressIndicator(
+              value: item.progress,
+              backgroundColor: BeamColors.border,
+              valueColor: const AlwaysStoppedAnimation(BeamColors.primary),
+              minHeight: 3,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(item.title, style: BeamTextStyles.bodySmall.copyWith(fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(item.formattedProgress, style: BeamTextStyles.caption.copyWith(fontSize: 10)),
               ],
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }
 }
 
-class _SearchBarEntry extends StatelessWidget {
-  final VoidCallback onTap;
-
-  const _SearchBarEntry({required this.onTap});
+class _SearchResultsView extends StatelessWidget {
+  final DiscoverProvider provider;
+  const _SearchResultsView({required this.provider});
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            color: context.bgSurface,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: context.borderStandard, width: 0.5),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.search_rounded, color: context.textQuaternary, size: 22),
-              const SizedBox(width: 12),
-              Text(
-                '搜索电影、剧集、演员、导演...',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: context.textTertiary,
-                ),
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: context.brandIndigo.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.mic_rounded, size: 14, color: context.brandViolet),
-                    const SizedBox(width: 4),
-                    Text(
-                      '语音',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: context.brandViolet,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+    if (provider.isLoading) {
+      return const Center(child: CircularProgressIndicator(color: BeamColors.primary));
+    }
+    if (provider.searchResults.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.search_off, color: BeamColors.textTertiary, size: 48),
+            const SizedBox(height: 12),
+            Text('未找到"${provider.searchQuery}"相关内容', style: BeamTextStyles.bodySmall),
+          ],
         ),
+      );
+    }
+    return ListView.separated(
+      itemCount: provider.searchResults.length,
+      separatorBuilder: (_, __) => const Divider(height: 1),
+      itemBuilder: (_, i) => ListTile(
+        leading: Container(
+          width: 40, height: 40,
+          decoration: BoxDecoration(
+            color: BeamColors.surfaceDim,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: const Icon(Icons.movie_outlined, color: BeamColors.textTertiary, size: 20),
+        ),
+        title: Text(provider.searchResults[i].title, style: BeamTextStyles.bodySmall),
+        subtitle: Text(provider.searchResults[i].subtitle ?? '', style: BeamTextStyles.caption),
+        trailing: const Icon(Icons.chevron_right, color: BeamColors.textTertiary, size: 16),
       ),
     );
   }

@@ -1,291 +1,174 @@
-// BeamTV 路由配置 - 基于 go_router
-library core.routing;
-
+/// BeamTV 路由配置
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../constants/app_constants.dart';
+import '../extensions/context_ext.dart';
 import '../../features/local_media/presentation/pages/local_media_page.dart';
 import '../../features/discover/presentation/pages/discover_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
-import '../../shared/widgets/main_scaffold.dart';
 
-/// 路由配置
 class AppRouter {
   static final GoRouter router = GoRouter(
-    initialLocation: Routes.initial,
-    debugLogDiagnostics: false,
+    initialLocation: '/',
     routes: [
-      // 主 Shell - 底部导航栏容器
-      StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) {
-          return MainScaffold(navigationShell: navigationShell);
-        },
-        branches: [
-          // 分支 1: 本地媒体
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: Routes.localMedia,
-                name: 'local-media',
-                builder: (context, state) => const LocalMediaPage(),
-                routes: [
-                  GoRoute(
-                    path: 'source/:sourceId',
-                    name: 'source-detail',
-                    builder: (context, state) {
-                      final sourceId = state.pathParameters['sourceId']!;
-                      return SourceDetailPage(sourceId: sourceId);
-                    },
-                  ),
-                  GoRoute(
-                    path: 'add-source',
-                    name: 'add-source',
-                    builder: (context, state) => const AddSourcePage(),
-                  ),
-                ],
-              ),
-            ],
+      ShellRoute(
+        builder: (context, state, child) => MainShell(child: child),
+        routes: [
+          GoRoute(
+            path: '/',
+            redirect: (context, state) => '/local-media',
           ),
-          // 分支 2: 发现 (原网络媒体)
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: Routes.discover,
-                name: 'discover',
-                builder: (context, state) => const DiscoverPage(),
-                routes: [
-                  GoRoute(
-                    path: 'search',
-                    name: 'search',
-                    builder: (context, state) => const SearchPage(),
-                  ),
-                  GoRoute(
-                    path: 'detail/:contentId',
-                    name: 'content-detail',
-                    builder: (context, state) {
-                      final contentId = state.pathParameters['contentId']!;
-                      return ContentDetailPage(contentId: contentId);
-                    },
-                  ),
-                ],
-              ),
-            ],
+          GoRoute(
+            path: '/local-media',
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const LocalMediaPage(),
+            ),
           ),
-          // 分支 3: 设置
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: Routes.settings,
-                name: 'settings',
-                builder: (context, state) => const SettingsPage(),
-              ),
-            ],
+          GoRoute(
+            path: '/discover',
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const DiscoverPage(),
+            ),
+          ),
+          GoRoute(
+            path: '/settings',
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const SettingsPage(),
+            ),
           ),
         ],
       ),
-      // 全屏播放器 - 脱离 Shell
       GoRoute(
-        path: Routes.player,
-        name: 'player',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) {
-          final extra = state.extra as Map<String, dynamic>?;
-          return PlayerPage(
-            mediaUrl: extra?['mediaUrl'] ?? '',
-            title: extra?['title'] ?? '',
-            subtitle: extra?['subtitle'],
-            posterUrl: extra?['posterUrl'],
-            mediaType: extra?['mediaType'] ?? 'movie',
-          );
-        },
+        path: '/player/:id',
+        builder: (context, state) => Scaffold(
+          backgroundColor: Colors.black,
+          body: Center(
+            child: Text('播放器 - ${state.pathParameters['id']}',
+              style: const TextStyle(color: Colors.white)),
+          ),
+        ),
       ),
     ],
-    errorBuilder: (context, state) => _ErrorPage(error: state.error.toString()),
-    redirect: (context, state) {
-      // 可在此添加认证重定向逻辑
-      return null;
-    },
-  );
-
-  static final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
-  static GlobalKey<NavigatorState> get rootNavigatorKey => _rootNavigatorKey;
-
-  // 导航辅助方法
-  static void go(int index) {
-    switch (index) {
-      case 0:
-        router.go(Routes.localMedia);
-        break;
-      case 1:
-        router.go(Routes.discover);
-        break;
-      case 2:
-        router.go(Routes.settings);
-        break;
-    }
-  }
-
-  static void pushPlayer({
-    required String mediaUrl,
-    required String title,
-    String? subtitle,
-    String? posterUrl,
-    String mediaType = 'movie',
-  }) {
-    router.push(
-      Routes.player,
-      extra: {
-        'mediaUrl': mediaUrl,
-        'title': title,
-        'subtitle': subtitle,
-        'posterUrl': posterUrl,
-        'mediaType': mediaType,
-      },
-    );
-  }
-}
-
-/// 错误页面
-class _ErrorPage extends StatelessWidget {
-  final String error;
-
-  const _ErrorPage({required this.error});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+    errorBuilder: (context, state) => Scaffold(
+      backgroundColor: const Color(0xFF08090A),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline_rounded,
-              size: 64,
-              color: context.errorRed,
-            ),
+            const Icon(Icons.error_outline, size: 64, color: Colors.red),
             const SizedBox(height: 16),
-            Text(
-              '页面未找到',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
+            Text('页面未找到', style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Colors.white)),
             const SizedBox(height: 8),
-            Text(
-              error,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: context.textTertiary,
-              ),
-              textAlign: TextAlign.center,
-            ),
+            Text('${state.uri}', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey)),
             const SizedBox(height: 24),
-            FilledButton(
-              onPressed: () => context.go(Routes.initial),
-              child: const Text('返回首页'),
+            ElevatedButton(
+              onPressed: () => context.go('/local-media'),
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF5E6AD2)),
+              child: const Text('返回首页', style: TextStyle(color: Colors.white)),
             ),
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
 }
 
-// 占位页面 - 待实现
-class SourceDetailPage extends StatelessWidget {
-  final String sourceId;
-
-  const SourceDetailPage({super.key, required this.sourceId});
+/// 主框架外壳
+class MainShell extends StatelessWidget {
+  final Widget child;
+  const MainShell({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('源详情: $sourceId')),
-      body: Center(child: Text('Source Detail Page - $sourceId')),
-    );
-  }
-}
-
-class AddSourcePage extends StatelessWidget {
-  const AddSourcePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('添加媒体源')),
-      body: const Center(child: Text('Add Source Page - 待实现')),
-    );
-  }
-}
-
-class SearchPage extends StatelessWidget {
-  const SearchPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('搜索')),
-      body: const Center(child: Text('Search Page - 待实现')),
-    );
-  }
-}
-
-class ContentDetailPage extends StatelessWidget {
-  final String contentId;
-
-  const ContentDetailPage({super.key, required this.contentId});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('详情: $contentId')),
-      body: Center(child: Text('Content Detail Page - $contentId')),
-    );
-  }
-}
-
-class PlayerPage extends StatelessWidget {
-  final String mediaUrl;
-  final String title;
-  final String? subtitle;
-  final String? posterUrl;
-  final String mediaType;
-
-  const PlayerPage({
-    super.key,
-    required this.mediaUrl,
-    required this.title,
-    this.subtitle,
-    this.posterUrl,
-    required this.mediaType,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.close_rounded, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Text(title, style: const TextStyle(color: Colors.white)),
+      backgroundColor: const Color(0xFF08090A),
+      body: Column(
+        children: [
+          // 顶部栏
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            decoration: const BoxDecoration(
+              border: Border(bottom: BorderSide(color: Color(0xFF1E1F22), width: 1)),
+            ),
+            child: Row(
+              children: [
+                // 标题和版本号
+                const Text('BeamTV', style: TextStyle(
+                  color: Color(0xFF5E6AD2), fontSize: 20, fontWeight: FontWeight.w700,
+                  fontFamily: 'monospace',
+                )),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF5E6AD2).withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text('v${AppConstants.version}', style: const TextStyle(
+                    color: Color(0xFF5E6AD2), fontSize: 11, fontWeight: FontWeight.w500,
+                  )),
+                ),
+                const Spacer(),
+                // 中文名
+                Text('光线传播', style: TextStyle(
+                  color: Colors.grey[600], fontSize: 13,
+                )),
+              ],
+            ),
+          ),
+          // 导航栏
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+            decoration: const BoxDecoration(
+              border: Border(bottom: BorderSide(color: Color(0xFF1E1F22), width: 1)),
+            ),
+            child: Row(
+              children: [
+                _TabButton(label: '本地媒体', icon: Icons.folder_outlined, path: '/local-media'),
+                _TabButton(label: '发现', icon: Icons.explore_outlined, path: '/discover'),
+                _TabButton(label: '设置', icon: Icons.settings_outlined, path: '/settings'),
+              ],
+            ),
+          ),
+          // 内容
+          Expanded(child: child),
+        ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+    );
+  }
+}
+
+class _TabButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final String path;
+  const _TabButton({required this.label, required this.icon, required this.path});
+
+  @override
+  Widget build(BuildContext context) {
+    final isActive = GoRouterState.of(context).uri.toString().startsWith(path);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      child: TextButton(
+        style: TextButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          backgroundColor: isActive ? const Color(0xFF5E6AD2).withOpacity(0.15) : Colors.transparent,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
+        ),
+        onPressed: () => context.go(path),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            if (posterUrl != null)
-              Image.network(posterUrl!, height: 200, errorBuilder: (_, __, ___) => const Icon(Icons.movie, size: 100, color: Colors.white38)),
-            const SizedBox(height: 24),
-            Text(title, style: const TextStyle(fontSize: 24, color: Colors.white)),
-            if (subtitle != null) ...[
-              const SizedBox(height: 8),
-              Text(subtitle!, style: const TextStyle(color: Colors.white70)),
-            ],
-            const SizedBox(height: 24),
-            const CircularProgressIndicator(),
-            const SizedBox(height: 16),
-            Text('播放中: $mediaUrl', style: const TextStyle(color: Colors.white38, fontSize: 12)),
+            Icon(icon, size: 16, color: isActive ? const Color(0xFF5E6AD2) : Colors.grey[500]),
+            const SizedBox(width: 6),
+            Text(label, style: TextStyle(
+              color: isActive ? const Color(0xFF5E6AD2) : Colors.grey[500],
+              fontSize: 13, fontWeight: FontWeight.w500,
+            )),
           ],
         ),
       ),
