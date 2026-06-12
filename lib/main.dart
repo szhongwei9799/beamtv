@@ -1,5 +1,6 @@
 // BeamTV 应用入口
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'core/theme/beam_theme.dart';
